@@ -1,0 +1,6 @@
+app:
+  envName: "local"
+api:
+  auth:
+    enabled: false
+---

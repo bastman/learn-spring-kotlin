@@ -1,0 +1,20 @@
+app:
+  envName: "INVALID_ENV_NAME"
+api:
+  auth:
+    enabled: true
+spring:
+  profiles:
+    active: local
+  http:
+    #converters:
+    #  preferred-json-mapper: jackson
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+  #jackson:
+  #  serialization:
+  #    write_dates_as_timestamps: false
+
+---
