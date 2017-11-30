@@ -25,7 +25,14 @@
       "dev": {
         "k8sContext":"minikube",
         "k8sApp":"learn-spring-kotlin-app-dev",
-        "k8sDeployment":"learn-spring-kotlin-app-dev"
+        "k8sDeployment":"learn-spring-kotlin-app-dev",
+        "k8sDeploymentFile":"./k8s/app/app-dev/deployment.yml"
+      },
+      "prod": {
+        "k8sContext":"minikube",
+        "k8sApp":"learn-spring-kotlin-app-prod",
+        "k8sDeployment":"learn-spring-kotlin-app-prod",
+        "k8sDeploymentFile":"./k8s/app/app-prod/deployment.yml"
       }
     }
   }

@@ -2,6 +2,7 @@
 - spring boot
 - kotlin
 - docker + docker-compose
+- kubernetes + minikube
 - make
 
 ## project configuration:
@@ -56,7 +57,36 @@
         # you may need to $ docker login <REGISTRY_HOST>
         $ make app.pull         
     ```    
-    
+- deploy to k8s (minikube)
+    ```
+        # you may need to $ docker login <REGISTRY_HOST>
+        
+        $ make app.deploy DEPLOY_CONCERN="dev" 
+        $ make app.deploy DEPLOY_CONCERN="prod"                
+    ```
+   
+# k8s: setup stack in minikube
+    ```
+        # you may need to $ docker login <REGISTRY_HOST>
+        # minikube must be up
+        
+        # start minikube
+        $ minkube start
+        
+        # create deployment
+        $ make k8s.deployment.create DEPLOY_CONCERN="dev"
+        $ make k8s.deployment.create DEPLOY_CONCERN="prod"    
+            
+        # apply deployment
+        $ make k8s.deployment.apply DEPLOY_CONCERN="dev"
+        $ make k8s.deployment.apply DEPLOY_CONCERN="prod"  
+              
+        # delete deployment
+        $ make k8s.deployment.create DEPLOY_CONCERN="dev"
+        $ make k8s.deployment.create DEPLOY_CONCERN="prod"       
+                                
+    ```
+   
 ## k8s: working with minikube and kubectl
 ```
         required version: 

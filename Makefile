@@ -125,3 +125,19 @@ app.deploy: manifest.verify version.expose guard-SERVICE_VERSION guard-DEPLOY_CO
 	kubectl get pods --all-namespaces -o=jsonpath="{..image}" -l app=$(K8S_APP_NAME) || true
 	@echo "=== k8s: deployed - current pods ... ==="
 	kubectl get pods --all-namespaces -l app=$(K8S_APP_NAME) || true
+
+k8s.deployment.create: manifest.verify guard-DEPLOY_CONCERN
+	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
+	$(eval K8S_DEPLOYMENT_FILE := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeploymentFile))
+	$ kubectl config use-context $(K8S_CONTEXT)
+	$ kubectl create -f $(K8S_DEPLOYMENT_FILE) --save-config
+k8s.deployment.apply: manifest.verify guard-DEPLOY_CONCERN
+	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
+	$(eval K8S_DEPLOYMENT_FILE := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeploymentFile))
+	$ kubectl config use-context $(K8S_CONTEXT)
+	$ kubectl apply -f $(K8S_DEPLOYMENT_FILE)
+k8s.deployment.delete: manifest.verify guard-DEPLOY_CONCERN
+	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
+	$(eval K8S_DEPLOYMENT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))
+	$ kubectl config use-context $(K8S_CONTEXT)
+	$ kubectl delete deployment $(K8S_DEPLOYMENT)
