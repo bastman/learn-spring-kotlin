@@ -101,3 +101,27 @@ app.pull: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.d
 	docker tag $(DOCKER_APP_TAG_LOCAL) $(DOCKER_APP_TAG_REMOTE)
 	@echo "docker pull $(DOCKER_APP_TAG_REMOTE)"
 	docker pull $(DOCKER_APP_TAG_REMOTE)
+
+app.deploy: manifest.verify version.expose guard-SERVICE_VERSION guard-DEPLOY_CONCERN
+	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
+	$(eval K8S_DEPLOYMENT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))
+	$(eval K8S_APP_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sApp))
+	@echo "=== k8s: context='$(K8S_CONTEXT)' deloyment='$(K8S_DEPLOYMENT)' app='$(K8S_APP_NAME)' image='$(DOCKER_APP_TAG_REMOTE)' ... ==="
+	# check image exist
+	docker pull $(DOCKER_APP_TAG_REMOTE)
+	# deploy it
+	$ kubectl config use-context $(K8S_CONTEXT)
+	$ kubectl config current-context
+	# describe pods
+	@echo "=== k8s: OLD IMAGE ... ==="
+	kubectl get pods --all-namespaces -o=jsonpath="{..image}" -l app=$(K8S_APP_NAME) || true
+	@echo "=== k8s: CURRENT PODs ... ==="
+	kubectl get pods --all-namespaces -l app=$(K8S_APP_NAME) || true
+	# change image
+	@echo "=== k8s: deploying ... ==="
+	$ kubectl set image deployment/$(K8S_DEPLOYMENT) $(K8S_APP_NAME)=$(DOCKER_APP_TAG_REMOTE)
+	# describe pods
+	@echo "=== k8s: deployed - current pods (images) ... ==="
+	kubectl get pods --all-namespaces -o=jsonpath="{..image}" -l app=$(K8S_APP_NAME) || true
+	@echo "=== k8s: deployed - current pods ... ==="
+	kubectl get pods --all-namespaces -l app=$(K8S_APP_NAME) || true

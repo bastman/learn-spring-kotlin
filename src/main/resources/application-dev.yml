@@ -1,0 +1,6 @@
+app:
+  envName: "dev"
+api:
+  auth:
+    enabled: false
+---

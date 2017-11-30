@@ -56,3 +56,44 @@
         # you may need to $ docker login <REGISTRY_HOST>
         $ make app.pull         
     ```    
+    
+## k8s: working with minikube and kubectl
+```
+        required version: 
+        - minikube >= v0.24.0
+        - kubectl >= v1.8.4        
+``` 
+
+
+```
+        # show outdated casks
+        
+        # install vagrant
+        $ brew cask install virtualbox
+        
+        # install minikube
+        $ brew cask install minikube
+        $ minikube version
+        
+        # re-install minikube (if outdated)
+        $ brew cask reinstall minikube
+        
+        # start, stop, delete minikube
+        $ minikube start
+        $ minikube stop
+        $ minikube delete
+        
+        
+        # install kubectl
+        $ brew install kubectl
+        $ brew upgrade kubectl
+        
+        # kubectl use context "minikube"
+        
+        $ kubectl config use-context minikube
+        $ kubectl config current-context
+        $ kubectl cluster-info
+        $ kubectl get nodes
+       
+``` 
+      

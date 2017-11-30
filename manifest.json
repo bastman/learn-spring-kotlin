@@ -19,5 +19,14 @@
         "remote":"docker.io/bastman77/"
       }
     }
+  },
+  "k8s": {
+    "concern":{
+      "dev": {
+        "k8sContext":"minikube",
+        "k8sApp":"learn-spring-kotlin-app-dev",
+        "k8sDeployment":"learn-spring-kotlin-app-dev"
+      }
+    }
   }
 }
