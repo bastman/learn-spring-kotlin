@@ -50,7 +50,7 @@ version.create: manifest.verify
 	@echo "(new) service.version: $(SERVICE_VERSION)"
 
 version.expose: manifest.verify
-	$(eval SERVICE_VERSION := $(shell ./bin/version.sh))
+	$(eval SERVICE_VERSION := $(shell cat $(SERVICE_VERSION_FILE)))
 	@echo "expose service.version: $(SERVICE_VERSION)"
 
 debug: manifest.verify app.clean version.show
