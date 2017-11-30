@@ -6,10 +6,17 @@ SERVICE_VERSION ?=""
 GRADLE_EXE ?= $(shell cat $(MANIFEST_FILE) | jq -r .gradle.exe)
 GRADLE_BUILD_COMMAND ?= $(shell cat $(MANIFEST_FILE) | jq -r .gradle.build)
 
+# e.g.: docker.io
+DOCKER_REMOTE_REGISTRY_HOST ?= $(shell cat $(MANIFEST_FILE) | jq -r .ci.dockerRegistry.host)
+
 DOCKER_COMPOSE_UP_ARGS=$(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.up)
 DOCKER_COMPOSE_DOWN_ARGS=$(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.down)
 DOCKER_APP_BUILD_COMMAND_ARGS=$(shell cat $(MANIFEST_FILE) | jq -r .docker.app.build)
-DOCKER_APP_TAG_LOCAL=local/$(SERVICE_NAME):$(SERVICE_VERSION)
+DOCKER_APP_TAG_PREFIX_LOCAL=$(shell cat $(MANIFEST_FILE) | jq -r .docker.app.imageTagPrefix.local)
+DOCKER_APP_TAG_PREFIX_REMOTE=$(shell cat $(MANIFEST_FILE) | jq -r .docker.app.imageTagPrefix.remote)
+DOCKER_APP_TAG_LOCAL=$(DOCKER_APP_TAG_PREFIX_LOCAL)$(SERVICE_NAME):$(SERVICE_VERSION)
+DOCKER_APP_TAG_REMOTE=$(DOCKER_APP_TAG_PREFIX_REMOTE)$(SERVICE_NAME):$(SERVICE_VERSION)
+
 
 USAGE="USAGE ... manifest=$(MANIFEST_FILE) service.name=$(SERVICE_NAME) service.version=$(SERVICE_VERSION)"
 guard-%:
@@ -25,8 +32,9 @@ usage:
 
 manifest.verify: guard-MANIFEST_FILE guard-SERVICE_NAME guard-SERVICE_VERSION_FILE
 manifest.verify.gradle: guard-GRADLE_EXE guard-GRADLE_BUILD_COMMAND
-manifest.verify.docker: guard-DOCKER_APP_BUILD_COMMAND_ARGS guard-DOCKER_APP_TAG_LOCAL
+manifest.verify.docker: guard-DOCKER_APP_BUILD_COMMAND_ARGS guard-DOCKER_APP_TAG_PREFIX_LOCAL guard-DOCKER_APP_TAG_LOCAL guard-DOCKER_APP_TAG_PREFIX_REMOTE guard-DOCKER_APP_TAG_REMOTE
 manifest.verify.docker-compose: guard-DOCKER_COMPOSE_UP_ARGS guard-DOCKER_COMPOSE_DOWN_ARGS
+
 
 devtools.jq.brew:
 	brew install jq
@@ -82,3 +90,14 @@ down: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docke
 down.v: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docker-compose
 	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(DOCKER_COMPOSE_DOWN_ARGS) -v
 	docker ps
+
+app.push: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docker
+	#docker login $(DOCKER_REMOTE_REGISTRY)
+	docker tag $(DOCKER_APP_TAG_LOCAL) $(DOCKER_APP_TAG_REMOTE)
+	@echo "docker push $(DOCKER_APP_TAG_REMOTE)"
+	docker push $(DOCKER_APP_TAG_REMOTE)
+app.pull: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docker
+	#docker login $(DOCKER_REMOTE_REGISTRY)
+	docker tag $(DOCKER_APP_TAG_LOCAL) $(DOCKER_APP_TAG_REMOTE)
+	@echo "docker pull $(DOCKER_APP_TAG_REMOTE)"
+	docker pull $(DOCKER_APP_TAG_REMOTE)

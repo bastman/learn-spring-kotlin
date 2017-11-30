@@ -13,7 +13,11 @@
       "down":"-f docker/docker-compose.yml down"
     },
     "app": {
-      "build":"-f docker/app/Dockerfile ."
+      "build":"-f docker/app/Dockerfile .",
+      "imageTagPrefix": {
+        "local":"local/",
+        "remote":"docker.io/bastman77/"
+      }
     }
   }
 }
