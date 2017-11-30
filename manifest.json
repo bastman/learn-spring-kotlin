@@ -1,0 +1,19 @@
+{
+  "service": {
+    "name":"learn-spring-kotlin",
+    "versionFile":"./version.txt"
+  },
+  "gradle":{
+    "exe":"./gradlew",
+    "build":"build -x test"
+  },
+  "docker": {
+    "compose": {
+      "up":"-f docker/docker-compose.yml up",
+      "down":"-f docker/docker-compose.yml down"
+    },
+    "app": {
+      "build":"-f docker/app/Dockerfile ."
+    }
+  }
+}
