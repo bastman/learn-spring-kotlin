@@ -80,6 +80,10 @@
         # apply deployment
         $ make k8s.deployment.apply DEPLOY_CONCERN="dev"
         $ make k8s.deployment.apply DEPLOY_CONCERN="prod"  
+        
+        # patch deployment
+        $ make k8s.deployment.patch DEPLOY_CONCERN="dev"
+        $ make k8s.deployment.patch DEPLOY_CONCERN="prod"  
               
         # delete deployment
         $ make k8s.deployment.create DEPLOY_CONCERN="dev"
