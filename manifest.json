@@ -5,21 +5,29 @@
   },
   "gradle":{
     "exe":"./gradlew",
-    "clean":"clean",
-    "build":"build -x test"
+    "clean":{
+      "command":"clean"
+    },
+    "build":{
+      "command":"build -x test"
+    }
   },
   "docker": {
     "compose": {
-      "up":"-f docker/docker-compose.yml up",
-      "down":"-f docker/docker-compose.yml down"
+      "up":{
+        "command":"-f docker/docker-compose.yml up"
+      },
+      "down":{
+        "command":"-f docker/docker-compose.yml down"
+      }
     },
     "app": {
-      "build":{
-        "command":"build -t $(DOCKER_TAG_LOCAL) -f docker/app/Dockerfile ."
-      },
       "tag": {
         "local":"local/$(SERVICE_NAME):$(SERVICE_VERSION)",
         "remote":"docker.io/bastman77/$(SERVICE_NAME):$(SERVICE_VERSION)"
+      },
+      "build":{
+        "command":"build -t $(DOCKER_TAG_LOCAL) -f docker/app/Dockerfile ."
       }
     }
   },
