@@ -40,6 +40,36 @@
     ```    
 
 ## ci
+- overview:
+    ```
+    (1) build: jar and docker image 
+        
+        e.g.: local/learn-spring-kotlin:2017-12-01T08.06.59Z
+        
+    (2) test stack: run local with docker-compose 
+         
+         image: e.g. local/learn-spring-kotlin:2017-12-01T08.06.59Z
+         
+    (3) push: docker image to registry
+         
+         tag image: local/learn-spring-kotlin:2017-12-01T08.06.59Z -> docker.io/bastman77/learn-spring-kotlin:2017-12-01T08.06.59Z
+         
+         push tag: docker.io/bastman77/learn-spring-kotlin:2017-12-01T08.06.59Z
+         
+    (4) deploy: deploy to kubernetes (e.g.: minikube)
+    
+        
+        (a) deploy to deployment/dev
+            
+            -> set image deployment=deployment/dev image=docker.io/bastman77/learn-spring-kotlin:2017-12-01T08.06.59Z
+        
+        (b) deploy to deployment/prod          
+            
+            -> set image deployment=deployment/prod image=docker.io/bastman77/learn-spring-kotlin:2017-12-01T08.06.59Z
+
+    ``` 
+    
+
 - requirements:
     ```
         you need create a docker repo
