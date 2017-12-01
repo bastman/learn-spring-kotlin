@@ -7,10 +7,6 @@ GRADLE_EXE ?= $(shell cat $(MANIFEST_FILE) | jq -r .gradle.exe)
 GRADLE_BUILD_COMMAND ?= $(shell cat $(MANIFEST_FILE) | jq -r .gradle.build)
 
 
-DOCKER_COMPOSE_UP_ARGS=$(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.up)
-DOCKER_COMPOSE_DOWN_ARGS=$(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.down)
-
-
 USAGE="USAGE ... manifest=$(MANIFEST_FILE) service.name=$(SERVICE_NAME) service.version=$(SERVICE_VERSION)"
 guard-%:
 	@if [ "${${*}}" == "" ]; then \
@@ -25,7 +21,6 @@ usage:
 
 manifest.verify: guard-MANIFEST_FILE guard-SERVICE_NAME guard-SERVICE_VERSION_FILE
 manifest.verify.gradle: guard-GRADLE_EXE guard-GRADLE_BUILD_COMMAND
-manifest.verify.docker-compose: guard-DOCKER_COMPOSE_UP_ARGS guard-DOCKER_COMPOSE_DOWN_ARGS
 
 
 devtools.jq.brew:
@@ -73,18 +68,21 @@ app.build: manifest.verify app.clean version.create guard-SERVICE_VERSION manife
 
 clean: app.clean
 build: app.build
-up: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docker-compose
+up: manifest.verify version.expose guard-SERVICE_VERSION
+	$(eval COMPOSE_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.up))
 	docker ps
-	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(DOCKER_COMPOSE_UP_ARGS)
-up.d: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docker-compose
+	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(COMPOSE_COMMAND)
+up.d: manifest.verify version.expose guard-SERVICE_VERSION
+	$(eval COMPOSE_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.up))
 	docker ps
-	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(DOCKER_COMPOSE_UP_ARGS) -d
+	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(COMPOSE_COMMAND) -d
 
-down: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docker-compose
-	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(DOCKER_COMPOSE_DOWN_ARGS)
+down: manifest.verify version.expose guard-SERVICE_VERSION
+	$(eval COMPOSE_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.down))
+	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(COMPOSE_COMMAND)
 	docker ps
-down.v: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docker-compose
-	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(DOCKER_COMPOSE_DOWN_ARGS) -v
+down.v: manifest.verify version.expose guard-SERVICE_VERSION
+	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(COMPOSE_COMMAND) -v
 	docker ps
 
 app.push: manifest.verify version.expose guard-SERVICE_VERSION
