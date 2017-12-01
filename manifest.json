@@ -14,11 +14,14 @@
   },
   "docker": {
     "compose": {
+      "vars": {
+        "COMPOSE_FILE":"docker/docker-compose.yml"
+      },
       "up":{
-        "command":"-f docker/docker-compose.yml up"
+        "command":"-f $(COMPOSE_FILE) up"
       },
       "down":{
-        "command":"-f docker/docker-compose.yml down"
+        "command":"-f $(COMPOSE_FILE) down"
       }
     },
     "app": {

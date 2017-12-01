@@ -70,19 +70,23 @@ app.build: manifest.verify app.clean version.create guard-SERVICE_VERSION manife
 clean: app.clean
 build: app.build
 up: manifest.verify version.expose guard-SERVICE_VERSION
+	$(eval COMPOSE_FILE := $(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.vars.COMPOSE_FILE))
 	$(eval COMPOSE_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.up.command))
 	docker ps
 	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(COMPOSE_COMMAND)
 up.d: manifest.verify version.expose guard-SERVICE_VERSION
+	$(eval COMPOSE_FILE := $(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.vars.COMPOSE_FILE))
 	$(eval COMPOSE_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.up.command))
 	docker ps
 	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(COMPOSE_COMMAND) -d
 
 down: manifest.verify version.expose guard-SERVICE_VERSION
+	$(eval COMPOSE_FILE := $(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.vars.COMPOSE_FILE))
 	$(eval COMPOSE_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.down.command))
 	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(COMPOSE_COMMAND)
 	docker ps
 down.v: manifest.verify version.expose guard-SERVICE_VERSION
+	$(eval COMPOSE_FILE := $(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.vars.COMPOSE_FILE))
 	$(eval COMPOSE_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.down.command))
 	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(COMPOSE_COMMAND) -v
 	docker ps
