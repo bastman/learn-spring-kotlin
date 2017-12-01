@@ -14,6 +14,10 @@
     },
     "app": {
       "build":"-f docker/app/Dockerfile .",
+      "tag": {
+        "local":"local/$(SERVICE_NAME):$(SERVICE_VERSION)",
+        "remote":"docker.io/bastman77/$(SERVICE_NAME):$(SERVICE_VERSION)"
+      },
       "imageTagPrefix": {
         "local":"local/",
         "remote":"docker.io/bastman77/"

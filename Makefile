@@ -70,10 +70,11 @@ version.expose: manifest.verify
 app.clean: manifest.verify manifest.verify.gradle version.clean
 	$(GRADLE_EXE) clean
 app.build: manifest.verify app.clean version.create guard-SERVICE_VERSION manifest.verify.gradle manifest.verify.docker
-	@echo "build service: $(SERVICE_NAME) version: $(SERVICE_VERSION) ..."
+	$(eval TAG_LOCAL := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.local))
+	@echo "build service: $(SERVICE_NAME) version: $(SERVICE_VERSION) tag: $(TAG_LOCAL) ..."
 	mkdir -p src/main/resources/public/ && cp -rf $(SERVICE_VERSION_FILE) src/main/resources/public/version.txt
 	$(GRADLE_EXE) $(GRADLE_BUILD_COMMAND)
-	docker build -t $(DOCKER_APP_TAG_LOCAL) $(DOCKER_APP_BUILD_COMMAND_ARGS)
+	docker build -t $(TAG_LOCAL) $(DOCKER_APP_BUILD_COMMAND_ARGS)
 
 clean: app.clean
 build: app.build
@@ -92,23 +93,25 @@ down.v: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.doc
 	docker ps
 
 app.push: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docker
-	#docker login $(DOCKER_REMOTE_REGISTRY)
-	docker tag $(DOCKER_APP_TAG_LOCAL) $(DOCKER_APP_TAG_REMOTE)
-	@echo "docker push $(DOCKER_APP_TAG_REMOTE)"
-	docker push $(DOCKER_APP_TAG_REMOTE)
+	$(eval TAG_LOCAL := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.local))
+	$(eval TAG_REMOTE := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.remote))
+	@echo "tag: $(SERVICE_NAME) version: $(SERVICE_VERSION) tag-local: $(TAG_LOCAL) -> tag-remote: $(TAG_REMOTE) ..."
+	docker tag $(TAG_LOCAL) $(TAG_REMOTE)
+	@echo "push: tag-remote: $(TAG_REMOTE) ..."
+	docker push $(TAG_REMOTE)
 app.pull: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docker
-	#docker login $(DOCKER_REMOTE_REGISTRY)
-	docker tag $(DOCKER_APP_TAG_LOCAL) $(DOCKER_APP_TAG_REMOTE)
-	@echo "docker pull $(DOCKER_APP_TAG_REMOTE)"
-	docker pull $(DOCKER_APP_TAG_REMOTE)
+	$(eval TAG_REMOTE := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.remote))
+	@echo "docker pull tag-remote: $(TAG_REMOTE)"
+	docker pull $(TAG_REMOTE)
 
 app.deploy: manifest.verify version.expose guard-SERVICE_VERSION guard-DEPLOY_CONCERN
+	$(eval TAG_REMOTE := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.remote))
 	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
 	$(eval K8S_DEPLOYMENT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))
 	$(eval K8S_APP_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sApp))
-	@echo "=== k8s: context='$(K8S_CONTEXT)' deloyment='$(K8S_DEPLOYMENT)' app='$(K8S_APP_NAME)' image='$(DOCKER_APP_TAG_REMOTE)' ... ==="
+	@echo "=== k8s: context='$(K8S_CONTEXT)' deloyment='$(K8S_DEPLOYMENT)' app='$(K8S_APP_NAME)' image='$(TAG_REMOTE)' ... ==="
 	# check image exist
-	docker pull $(DOCKER_APP_TAG_REMOTE)
+	docker pull $(TAG_REMOTE)
 	# deploy it
 	$ kubectl config use-context $(K8S_CONTEXT)
 	$ kubectl config current-context
@@ -119,7 +122,7 @@ app.deploy: manifest.verify version.expose guard-SERVICE_VERSION guard-DEPLOY_CO
 	kubectl get pods --all-namespaces -l app=$(K8S_APP_NAME) || true
 	# change image
 	@echo "=== k8s: deploying ... ==="
-	$ kubectl set image deployment/$(K8S_DEPLOYMENT) $(K8S_APP_NAME)=$(DOCKER_APP_TAG_REMOTE) --record
+	$ kubectl set image deployment/$(K8S_DEPLOYMENT) $(K8S_APP_NAME)=$(TAG_REMOTE) --record
 	# describe pods
 	@echo "=== k8s: deployed - current pods (images) ... ==="
 	kubectl get pods --all-namespaces -o=jsonpath="{..image}" -l app=$(K8S_APP_NAME) || true
