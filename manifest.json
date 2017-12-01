@@ -27,7 +27,7 @@
         "k8sApp":"learn-spring-kotlin-app-dev",
         "k8sDeployment":"learn-spring-kotlin-app-dev",
         "deployment": {
-          "create":"create -f ./k8s/app/app-dev/deployment.yml --save-config",
+          "create":"apply -f ./k8s/app/app-dev/deployment.yml --record",
           "apply":"apply -f ./k8s/app/app-dev/deployment.yml --record",
           "export":"-o yaml > ./k8s/app/app-dev/deployment.export.yml",
           "patch":{
@@ -45,7 +45,7 @@
           "apply":"apply -f ./k8s/app/app-prod/deployment.yml --record",
           "export":"-o yaml > ./k8s/app/app-prod/deployment.export.yml",
           "patch":{
-            "patchFile":"./k8s/app/app-dev/deployment.yml",
+            "patchFile":"./k8s/app/app-prod/deployment.yml",
             "args":"--record"
           }
         }

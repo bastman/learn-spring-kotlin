@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: learn-spring-kotlin-app-dev
-        #image: docker.io/bastman77/learn-spring-kotlin:2017-11-30T13.41.37Z
+        image: docker.io/bastman77/learn-spring-kotlin:2017-11-30T13.41.37Z
         command: ["java"]
         args: ["-jar", "-Dspring.profiles.active=dev", "-Xms32m", "-Xmx128m", "/opt/learn-spring-kotlin/app.jar"]
 
