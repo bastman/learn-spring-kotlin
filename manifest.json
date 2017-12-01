@@ -39,8 +39,8 @@
       "dev": {
         "vars":{
           "K8S_CONTEXT":"minikube",
-          "K8S_APP_NAME":"learn-spring-kotlin-app-dev",
-          "K8S_DEPLOYMENT_NAME":"learn-spring-kotlin-app-dev"
+          "K8S_APP_NAME":"learn-spring-kotlin-app-$(DEPLOY_CONCERN)",
+          "K8S_DEPLOYMENT_NAME":"learn-spring-kotlin-app-$(DEPLOY_CONCERN)"
         },
         "deployment": {
           "create":{
@@ -65,8 +65,8 @@
       "prod": {
         "vars":{
           "K8S_CONTEXT":"minikube",
-          "K8S_APP_NAME":"learn-spring-kotlin-app-prod",
-          "K8S_DEPLOYMENT_NAME":"learn-spring-kotlin-app-prod"
+          "K8S_APP_NAME":"learn-spring-kotlin-app-$(DEPLOY_CONCERN)",
+          "K8S_DEPLOYMENT_NAME":"learn-spring-kotlin-app-$(DEPLOY_CONCERN)"
         },
         "deployment": {
           "create":{
