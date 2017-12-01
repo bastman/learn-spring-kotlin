@@ -119,7 +119,7 @@ app.deploy: manifest.verify version.expose guard-SERVICE_VERSION guard-DEPLOY_CO
 	kubectl get pods --all-namespaces -l app=$(K8S_APP_NAME) || true
 	# change image
 	@echo "=== k8s: deploying ... ==="
-	$ kubectl set image deployment/$(K8S_DEPLOYMENT) $(K8S_APP_NAME)=$(DOCKER_APP_TAG_REMOTE)
+	$ kubectl set image deployment/$(K8S_DEPLOYMENT) $(K8S_APP_NAME)=$(DOCKER_APP_TAG_REMOTE) --record
 	# describe pods
 	@echo "=== k8s: deployed - current pods (images) ... ==="
 	kubectl get pods --all-namespaces -o=jsonpath="{..image}" -l app=$(K8S_APP_NAME) || true
@@ -128,16 +128,36 @@ app.deploy: manifest.verify version.expose guard-SERVICE_VERSION guard-DEPLOY_CO
 
 k8s.deployment.create: manifest.verify guard-DEPLOY_CONCERN
 	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
-	$(eval K8S_DEPLOYMENT_FILE := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeploymentFile))
+	$(eval K8S_DEPLOYMENT_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))
+	$(eval K8S_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).deployment.create))
+	@echo "=== k8s: create deployment=$(K8S_DEPLOYMENT_NAME) content=$(K8S_CONTEXT) ... ==="
 	$ kubectl config use-context $(K8S_CONTEXT)
-	$ kubectl create -f $(K8S_DEPLOYMENT_FILE) --save-config
+	$ kubectl $(K8S_COMMAND)
 k8s.deployment.apply: manifest.verify guard-DEPLOY_CONCERN
 	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
-	$(eval K8S_DEPLOYMENT_FILE := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeploymentFile))
+	$(eval K8S_DEPLOYMENT_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))
+	$(eval K8S_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).deployment.apply))
+	@echo "=== k8s: apply deployment=$(K8S_DEPLOYMENT_NAME) content=$(K8S_CONTEXT) ... ==="
 	$ kubectl config use-context $(K8S_CONTEXT)
-	$ kubectl apply -f $(K8S_DEPLOYMENT_FILE)
+	$ kubectl $(K8S_COMMAND)
+k8s.deployment.patch: manifest.verify guard-DEPLOY_CONCERN
+	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
+	$(eval K8S_DEPLOYMENT_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))
+	$(eval K8S_PATCH_FILE := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).deployment.patch.patchFile))
+	$(eval K8S_PATCH_ARGS := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).deployment.patch.args))
+	@echo "=== k8s: patch deployment=$(K8S_DEPLOYMENT_NAME) content=$(K8S_CONTEXT) patch-file=$(K8S_PATCH_FILE) args=$(K8S_PATCH_ARGS) ... ==="
+	$ kubectl config use-context $(K8S_CONTEXT)
+	$ kubectl patch deployment $(K8S_DEPLOYMENT_NAME) $(K8S_PATCH_ARGS) --patch "$(shell cat $(K8S_PATCH_FILE))"
+k8s.deployment.export: manifest.verify guard-DEPLOY_CONCERN
+	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
+	$(eval K8S_DEPLOYMENT_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))
+	$(eval K8S_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).deployment.export))
+	@echo "=== k8s: export deployment=$(K8S_DEPLOYMENT_NAME) content=$(K8S_CONTEXT) ... ==="
+	$ kubectl config use-context $(K8S_CONTEXT)
+	$ kubectl get deployment $(K8S_DEPLOYMENT_NAME) --export $(K8S_COMMAND)
 k8s.deployment.delete: manifest.verify guard-DEPLOY_CONCERN
 	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
-	$(eval K8S_DEPLOYMENT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))
+	$(eval K8S_DEPLOYMENT_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))
+	@echo "=== k8s: delete deployment=$(K8S_DEPLOYMENT_NAME) content=$(K8S_CONTEXT) ... ==="
 	$ kubectl config use-context $(K8S_CONTEXT)
-	$ kubectl delete deployment $(K8S_DEPLOYMENT)
+	$ kubectl delete deployment $(K8S_DEPLOYMENT_NAME)

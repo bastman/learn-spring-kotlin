@@ -21,17 +21,17 @@ spec:
     spec:
       containers:
       - name: learn-spring-kotlin-app-dev
-        image: docker.io/bastman77/learn-spring-kotlin:2017-11-30T13.41.37Z
+        #image: docker.io/bastman77/learn-spring-kotlin:2017-11-30T13.41.37Z
         command: ["java"]
-        args: ["-jar", "-Dspring.profiles.active=dev", "-Xms32m", "-Xmx256m", "/opt/learn-spring-kotlin/app.jar"]
+        args: ["-jar", "-Dspring.profiles.active=dev", "-Xms32m", "-Xmx128m", "/opt/learn-spring-kotlin/app.jar"]
 
         resources:
           requests:
-            memory: "512M"
-            cpu: 0.4
+            memory: "256M"
+            cpu: 0.2
           limits:
-            memory: "1.0G"
-            cpu: 0.8
+            memory: "384M"
+            cpu: 0.4
         ports:
         - containerPort: 8080
 
