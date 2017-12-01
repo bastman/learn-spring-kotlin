@@ -50,8 +50,7 @@
             "command":"apply -f ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.yml --record"
           },
           "export":{
-            "command":"get deployment $(K8S_DEPLOYMENT_NAME) --export $(K8S_COMMAND_ARGS)",
-            "args":"-o yaml > ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.export.yml"
+            "command":"get deployment $(K8S_DEPLOYMENT_NAME) --export -o yaml > ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.export.yml"
           },
           "delete":{
             "command":"delete deployment $(K8S_DEPLOYMENT_NAME)"
@@ -76,8 +75,7 @@
             "command":"apply -f ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.yml --record"
           },
           "export":{
-            "command":"get deployment $(K8S_DEPLOYMENT_NAME) --export $(K8S_COMMAND_ARGS)",
-            "args":"-o yaml > ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.export.yml"
+            "command":"get deployment $(K8S_DEPLOYMENT_NAME) --export -o yaml > ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.export.yml"
           },
           "delete":{
             "command":"delete deployment $(K8S_DEPLOYMENT_NAME)"
