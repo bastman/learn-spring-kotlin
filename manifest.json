@@ -1,6 +1,8 @@
 {
   "service": {
-    "name":"learn-spring-kotlin",
+    "vars":{
+      "SERVICE_NAME":"learn-spring-kotlin"
+    },
     "versionFile":"./version.txt"
   },
   "gradle":{

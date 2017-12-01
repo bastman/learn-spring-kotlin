@@ -1,5 +1,5 @@
 MANIFEST_FILE ?= "manifest.json"
-SERVICE_NAME ?= $(shell cat $(MANIFEST_FILE) | jq -r .service.name)
+SERVICE_NAME ?= $(shell cat $(MANIFEST_FILE) | jq -r .service.vars.SERVICE_NAME)
 SERVICE_VERSION_FILE ?= $(shell cat $(MANIFEST_FILE) | jq -r .service.versionFile)
 SERVICE_VERSION ?=""
 
@@ -108,7 +108,7 @@ app.deploy: manifest.verify version.expose guard-SERVICE_VERSION guard-DEPLOY_CO
 	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).vars.K8S_CONTEXT))
 	$(eval K8S_DEPLOYMENT_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).vars.K8S_DEPLOYMENT_NAME))
 	$(eval K8S_APP_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).vars.K8S_APP_NAME))
-	@echo "=== k8s: context='$(K8S_CONTEXT)' deloyment='$(K8S_DEPLOYMENT)' app='$(K8S_APP_NAME)' image='$(TAG_REMOTE)' ... ==="
+	@echo "=== k8s: context='$(K8S_CONTEXT)' deloyment='$(K8S_DEPLOYMENT_NAME)' app='$(K8S_APP_NAME)' image='$(TAG_REMOTE)' ... ==="
 	# check image exist
 	docker pull $(TAG_REMOTE)
 	# deploy it
