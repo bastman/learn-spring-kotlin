@@ -5,6 +5,7 @@
   },
   "gradle":{
     "exe":"./gradlew",
+    "clean":"clean",
     "build":"build -x test"
   },
   "docker": {

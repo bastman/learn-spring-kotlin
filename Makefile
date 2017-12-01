@@ -4,7 +4,6 @@ SERVICE_VERSION_FILE ?= $(shell cat $(MANIFEST_FILE) | jq -r .service.versionFil
 SERVICE_VERSION ?=""
 
 GRADLE_EXE ?= $(shell cat $(MANIFEST_FILE) | jq -r .gradle.exe)
-GRADLE_BUILD_COMMAND ?= $(shell cat $(MANIFEST_FILE) | jq -r .gradle.build)
 
 
 USAGE="USAGE ... manifest=$(MANIFEST_FILE) service.name=$(SERVICE_NAME) service.version=$(SERVICE_VERSION)"
@@ -20,7 +19,7 @@ usage:
 
 
 manifest.verify: guard-MANIFEST_FILE guard-SERVICE_NAME guard-SERVICE_VERSION_FILE
-manifest.verify.gradle: guard-GRADLE_EXE guard-GRADLE_BUILD_COMMAND
+manifest.verify.gradle: guard-GRADLE_EXE
 
 
 devtools.jq.brew:
@@ -55,15 +54,17 @@ version.expose: manifest.verify
 
 
 app.clean: manifest.verify manifest.verify.gradle version.clean
-	$(GRADLE_EXE) clean
+	$(eval GRADLE_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .gradle.clean))
+	$(GRADLE_EXE) $(GRADLE_COMMAND)
 app.build: manifest.verify app.clean version.create guard-SERVICE_VERSION manifest.verify.gradle
+	$(eval GRADLE_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .gradle.build))
 	$(eval DOCKER_TAG_LOCAL := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.local))
 	$(eval DOCKER_COMMAND_ARGS := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.build.args))
 	$(eval DOCKER_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.build.command))
 
 	@echo "build service: $(SERVICE_NAME) version: $(SERVICE_VERSION) docker-tag: $(DOCKER_TAG_LOCAL) docker-cmd: $(DOCKER_COMMAND) ..."
 	mkdir -p src/main/resources/public/ && cp -rf $(SERVICE_VERSION_FILE) src/main/resources/public/version.txt
-	$(GRADLE_EXE) $(GRADLE_BUILD_COMMAND)
+	$(GRADLE_EXE) $(GRADLE_COMMAND)
 	docker $(DOCKER_COMMAND)
 
 clean: app.clean
