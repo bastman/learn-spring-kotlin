@@ -96,7 +96,7 @@
     ```
    
 # k8s: setup stack in minikube
-    ```
+   ```
         # you may need to $ docker login <REGISTRY_HOST>
         # minikube must be up
         
@@ -119,7 +119,7 @@
         $ make k8s.deployment.create DEPLOY_CONCERN="dev"
         $ make k8s.deployment.create DEPLOY_CONCERN="prod"       
                                 
-    ```
+   ```
    
 ## k8s: working with minikube and kubectl
 ```
