@@ -27,13 +27,21 @@
         "k8sApp":"learn-spring-kotlin-app-dev",
         "k8sDeployment":"learn-spring-kotlin-app-dev",
         "deployment": {
-          "create":"apply -f ./k8s/app/app-dev/deployment.yml --record",
-          "apply":"apply -f ./k8s/app/app-dev/deployment.yml --record",
+          "create":{
+            "command":"apply -f ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.yml --record"
+          },
+          "apply":{
+            "command":"apply -f ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.yml --record"
+          },
           "export":{
-            "args":"-o yaml > ./k8s/app/app-dev/deployment.export.yml"
+            "command":"get deployment $(K8S_DEPLOYMENT_NAME) --export $(K8S_COMMAND_ARGS)",
+            "args":"-o yaml > ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.export.yml"
+          },
+          "delete":{
+            "command":"delete deployment $(K8S_DEPLOYMENT_NAME)"
           },
           "patch":{
-            "patchFile":"./k8s/app/app-dev/deployment.yml",
+            "patchFile":"./k8s/app/app-$(DEPLOY_CONCERN)/deployment.yml",
             "args":"--record"
           }
         }
@@ -43,13 +51,21 @@
         "k8sApp":"learn-spring-kotlin-app-prod",
         "k8sDeployment":"learn-spring-kotlin-app-prod",
         "deployment": {
-          "create":"create -f ./k8s/app/app-prod/deployment.yml --save-config",
-          "apply":"apply -f ./k8s/app/app-prod/deployment.yml --record",
+          "create":{
+            "command":"apply -f ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.yml --record"
+          },
+          "apply":{
+            "command":"apply -f ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.yml --record"
+          },
           "export":{
-            "args":"-o yaml > ./k8s/app/app-prod/deployment.export.yml"
+            "command":"get deployment $(K8S_DEPLOYMENT_NAME) --export $(K8S_COMMAND_ARGS)",
+            "args":"-o yaml > ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.export.yml"
+          },
+          "delete":{
+            "command":"delete deployment $(K8S_DEPLOYMENT_NAME)"
           },
           "patch":{
-            "patchFile":"./k8s/app/app-prod/deployment.yml",
+            "patchFile":"./k8s/app/app-$(DEPLOY_CONCERN)/deployment.yml",
             "args":"--record"
           }
         }
