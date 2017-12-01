@@ -144,17 +144,17 @@ k8s.deployment.patch: manifest.verify guard-DEPLOY_CONCERN
 	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
 	$(eval K8S_DEPLOYMENT_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))
 	$(eval K8S_PATCH_FILE := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).deployment.patch.patchFile))
-	$(eval K8S_PATCH_ARGS := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).deployment.patch.args))
+	$(eval K8S_COMMAND_ARGS := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).deployment.patch.args))
 	@echo "=== k8s: patch deployment=$(K8S_DEPLOYMENT_NAME) content=$(K8S_CONTEXT) patch-file=$(K8S_PATCH_FILE) args=$(K8S_PATCH_ARGS) ... ==="
 	$ kubectl config use-context $(K8S_CONTEXT)
-	$ kubectl patch deployment $(K8S_DEPLOYMENT_NAME) $(K8S_PATCH_ARGS) --patch "$(shell cat $(K8S_PATCH_FILE))"
+	$ kubectl patch deployment $(K8S_DEPLOYMENT_NAME) $(K8S_COMMAND_ARGS) --patch "$(shell cat $(K8S_PATCH_FILE))"
 k8s.deployment.export: manifest.verify guard-DEPLOY_CONCERN
 	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
 	$(eval K8S_DEPLOYMENT_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))
-	$(eval K8S_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).deployment.export))
+	$(eval K8S_COMMAND_ARGS := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).deployment.export.args))
 	@echo "=== k8s: export deployment=$(K8S_DEPLOYMENT_NAME) content=$(K8S_CONTEXT) ... ==="
 	$ kubectl config use-context $(K8S_CONTEXT)
-	$ kubectl get deployment $(K8S_DEPLOYMENT_NAME) --export $(K8S_COMMAND)
+	$ kubectl get deployment $(K8S_DEPLOYMENT_NAME) --export $(K8S_COMMAND_ARGS)
 k8s.deployment.delete: manifest.verify guard-DEPLOY_CONCERN
 	$(eval K8S_CONTEXT := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sContext))
 	$(eval K8S_DEPLOYMENT_NAME := $(shell cat $(MANIFEST_FILE) | jq -r .k8s.concern.$(DEPLOY_CONCERN).k8sDeployment))

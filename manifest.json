@@ -29,7 +29,9 @@
         "deployment": {
           "create":"apply -f ./k8s/app/app-dev/deployment.yml --record",
           "apply":"apply -f ./k8s/app/app-dev/deployment.yml --record",
-          "export":"-o yaml > ./k8s/app/app-dev/deployment.export.yml",
+          "export":{
+            "args":"-o yaml > ./k8s/app/app-dev/deployment.export.yml"
+          },
           "patch":{
             "patchFile":"./k8s/app/app-dev/deployment.yml",
             "args":"--record"
@@ -43,7 +45,9 @@
         "deployment": {
           "create":"create -f ./k8s/app/app-prod/deployment.yml --save-config",
           "apply":"apply -f ./k8s/app/app-prod/deployment.yml --record",
-          "export":"-o yaml > ./k8s/app/app-prod/deployment.export.yml",
+          "export":{
+            "args":"-o yaml > ./k8s/app/app-prod/deployment.export.yml"
+          },
           "patch":{
             "patchFile":"./k8s/app/app-prod/deployment.yml",
             "args":"--record"
