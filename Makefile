@@ -62,13 +62,14 @@ version.expose: manifest.verify
 app.clean: manifest.verify manifest.verify.gradle version.clean
 	$(GRADLE_EXE) clean
 app.build: manifest.verify app.clean version.create guard-SERVICE_VERSION manifest.verify.gradle
-	$(eval TAG_LOCAL := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.local))
-	$(eval DOCKER_COMMAND_ARGS := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.build))
+	$(eval DOCKER_TAG_LOCAL := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.local))
+	$(eval DOCKER_COMMAND_ARGS := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.build.args))
+	$(eval DOCKER_COMMAND := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.build.command))
 
-	@echo "build service: $(SERVICE_NAME) version: $(SERVICE_VERSION) tag: $(TAG_LOCAL) args: $(DOCKER_COMMAND_ARGS) ..."
+	@echo "build service: $(SERVICE_NAME) version: $(SERVICE_VERSION) docker-tag: $(DOCKER_TAG_LOCAL) docker-cmd: $(DOCKER_COMMAND) ..."
 	mkdir -p src/main/resources/public/ && cp -rf $(SERVICE_VERSION_FILE) src/main/resources/public/version.txt
 	$(GRADLE_EXE) $(GRADLE_BUILD_COMMAND)
-	docker build -t $(TAG_LOCAL) $(DOCKER_COMMAND_ARGS)
+	docker $(DOCKER_COMMAND)
 
 clean: app.clean
 build: app.build
