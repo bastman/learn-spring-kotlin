@@ -6,16 +6,9 @@ SERVICE_VERSION ?=""
 GRADLE_EXE ?= $(shell cat $(MANIFEST_FILE) | jq -r .gradle.exe)
 GRADLE_BUILD_COMMAND ?= $(shell cat $(MANIFEST_FILE) | jq -r .gradle.build)
 
-# e.g.: docker.io
-DOCKER_REMOTE_REGISTRY_HOST ?= $(shell cat $(MANIFEST_FILE) | jq -r .ci.dockerRegistry.host)
 
 DOCKER_COMPOSE_UP_ARGS=$(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.up)
 DOCKER_COMPOSE_DOWN_ARGS=$(shell cat $(MANIFEST_FILE) | jq -r .docker.compose.down)
-DOCKER_APP_BUILD_COMMAND_ARGS=$(shell cat $(MANIFEST_FILE) | jq -r .docker.app.build)
-DOCKER_APP_TAG_PREFIX_LOCAL=$(shell cat $(MANIFEST_FILE) | jq -r .docker.app.imageTagPrefix.local)
-DOCKER_APP_TAG_PREFIX_REMOTE=$(shell cat $(MANIFEST_FILE) | jq -r .docker.app.imageTagPrefix.remote)
-DOCKER_APP_TAG_LOCAL=$(DOCKER_APP_TAG_PREFIX_LOCAL)$(SERVICE_NAME):$(SERVICE_VERSION)
-DOCKER_APP_TAG_REMOTE=$(DOCKER_APP_TAG_PREFIX_REMOTE)$(SERVICE_NAME):$(SERVICE_VERSION)
 
 
 USAGE="USAGE ... manifest=$(MANIFEST_FILE) service.name=$(SERVICE_NAME) service.version=$(SERVICE_VERSION)"
@@ -32,7 +25,6 @@ usage:
 
 manifest.verify: guard-MANIFEST_FILE guard-SERVICE_NAME guard-SERVICE_VERSION_FILE
 manifest.verify.gradle: guard-GRADLE_EXE guard-GRADLE_BUILD_COMMAND
-manifest.verify.docker: guard-DOCKER_APP_BUILD_COMMAND_ARGS guard-DOCKER_APP_TAG_PREFIX_LOCAL guard-DOCKER_APP_TAG_LOCAL guard-DOCKER_APP_TAG_PREFIX_REMOTE guard-DOCKER_APP_TAG_REMOTE
 manifest.verify.docker-compose: guard-DOCKER_COMPOSE_UP_ARGS guard-DOCKER_COMPOSE_DOWN_ARGS
 
 
@@ -69,12 +61,14 @@ version.expose: manifest.verify
 
 app.clean: manifest.verify manifest.verify.gradle version.clean
 	$(GRADLE_EXE) clean
-app.build: manifest.verify app.clean version.create guard-SERVICE_VERSION manifest.verify.gradle manifest.verify.docker
+app.build: manifest.verify app.clean version.create guard-SERVICE_VERSION manifest.verify.gradle
 	$(eval TAG_LOCAL := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.local))
-	@echo "build service: $(SERVICE_NAME) version: $(SERVICE_VERSION) tag: $(TAG_LOCAL) ..."
+	$(eval DOCKER_COMMAND_ARGS := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.build))
+
+	@echo "build service: $(SERVICE_NAME) version: $(SERVICE_VERSION) tag: $(TAG_LOCAL) args: $(DOCKER_COMMAND_ARGS) ..."
 	mkdir -p src/main/resources/public/ && cp -rf $(SERVICE_VERSION_FILE) src/main/resources/public/version.txt
 	$(GRADLE_EXE) $(GRADLE_BUILD_COMMAND)
-	docker build -t $(TAG_LOCAL) $(DOCKER_APP_BUILD_COMMAND_ARGS)
+	docker build -t $(TAG_LOCAL) $(DOCKER_COMMAND_ARGS)
 
 clean: app.clean
 build: app.build
@@ -92,14 +86,14 @@ down.v: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.doc
 	export SERVICE_VERSION=$(SERVICE_VERSION) && export SERVICE_NAME=$(SERVICE_NAME) && docker-compose $(DOCKER_COMPOSE_DOWN_ARGS) -v
 	docker ps
 
-app.push: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docker
+app.push: manifest.verify version.expose guard-SERVICE_VERSION
 	$(eval TAG_LOCAL := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.local))
 	$(eval TAG_REMOTE := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.remote))
 	@echo "tag: $(SERVICE_NAME) version: $(SERVICE_VERSION) tag-local: $(TAG_LOCAL) -> tag-remote: $(TAG_REMOTE) ..."
 	docker tag $(TAG_LOCAL) $(TAG_REMOTE)
 	@echo "push: tag-remote: $(TAG_REMOTE) ..."
 	docker push $(TAG_REMOTE)
-app.pull: manifest.verify version.expose guard-SERVICE_VERSION manifest.verify.docker
+app.pull: manifest.verify version.expose guard-SERVICE_VERSION
 	$(eval TAG_REMOTE := $(shell cat $(MANIFEST_FILE) | jq -r .docker.app.tag.remote))
 	@echo "docker pull tag-remote: $(TAG_REMOTE)"
 	docker pull $(TAG_REMOTE)
