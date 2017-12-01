@@ -37,9 +37,11 @@
   "k8s": {
     "concern":{
       "dev": {
-        "k8sContext":"minikube",
-        "k8sApp":"learn-spring-kotlin-app-dev",
-        "k8sDeployment":"learn-spring-kotlin-app-dev",
+        "vars":{
+          "K8S_CONTEXT":"minikube",
+          "K8S_APP_NAME":"learn-spring-kotlin-app-dev",
+          "K8S_DEPLOYMENT_NAME":"learn-spring-kotlin-app-dev"
+        },
         "deployment": {
           "create":{
             "command":"apply -f ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.yml --record"
@@ -61,9 +63,11 @@
         }
       },
       "prod": {
-        "k8sContext":"minikube",
-        "k8sApp":"learn-spring-kotlin-app-prod",
-        "k8sDeployment":"learn-spring-kotlin-app-prod",
+        "vars":{
+          "K8S_CONTEXT":"minikube",
+          "K8S_APP_NAME":"learn-spring-kotlin-app-prod",
+          "K8S_DEPLOYMENT_NAME":"learn-spring-kotlin-app-prod"
+        },
         "deployment": {
           "create":{
             "command":"apply -f ./k8s/app/app-$(DEPLOY_CONCERN)/deployment.yml --record"
