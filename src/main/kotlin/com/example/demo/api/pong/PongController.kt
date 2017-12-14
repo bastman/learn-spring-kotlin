@@ -32,9 +32,8 @@ class PongController(private val repo: PongRepository) {
             throw EntityNotFoundException("Pong with id=$id not found!")
         }
     }
-
-
 }
 
 private fun RepositoryItem.toPongResponse()
         = PongResponse(id = id, pong = pong.toUpperCase(), modifiedAt = modifiedAt)
+
